@@ -2,11 +2,13 @@
 using Domain.Model.Dto;
 using Infrastructure.Repository.InterfacesServices;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Shared;
 
 namespace APIRestSistemaVentas.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MovimientoStockController : ControllerBase
