@@ -110,6 +110,8 @@ app.UseCors("NuevaPolitica");
 
 app.UseRouting();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
