@@ -23,7 +23,7 @@ builder.Services.AddServices();
 builder.Services.AddValidators();
 builder.Services.AddHttpClient("AdminApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7047"); // api_admin
+    client.BaseAddress = new Uri("https://localhost:7134");
 });
 
 // JWT Auth
