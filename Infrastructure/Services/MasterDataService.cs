@@ -14,7 +14,7 @@ namespace Infrastructure.Services
         public async Task<bool> ProductoExisteAsync(int idProducto)
         {
             var client = _httpClientFactory.CreateClient("AdminApi");
-            var response = await client.GetAsync($"/api/Producto/{idProducto}");
+            var response = await client.GetAsync($"/admin/Producto/{idProducto}");
             return response.IsSuccessStatusCode;
         }
     }
