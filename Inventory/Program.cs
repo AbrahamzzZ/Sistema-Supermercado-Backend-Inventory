@@ -1,6 +1,7 @@
 using Domain.Context;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Infrastructure.Extensions;
+using Infrastructure.Handler;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -21,10 +22,14 @@ builder.Services.AddDbContext<InventorySistemaSupermercadoContext>(options =>
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddValidators();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<TokenDelegatingHandler>();
 builder.Services.AddHttpClient("AdminApi", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7134");
-});
+})
+.AddHttpMessageHandler<TokenDelegatingHandler>();
 
 // JWT Auth
 builder.Services.AddAuthentication(options =>

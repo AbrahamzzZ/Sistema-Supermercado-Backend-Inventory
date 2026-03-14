@@ -1,12 +1,10 @@
-﻿using Domain.Model;
-using Domain.Model.Dto;
+﻿using Domain.Model.Dto;
 using Infrastructure.Repository.InterfacesServices;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Utilities.Shared;
 
-namespace APIRestSistemaVentas.Controllers
+namespace Inventory.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
