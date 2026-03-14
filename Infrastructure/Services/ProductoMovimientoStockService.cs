@@ -1,11 +1,9 @@
-﻿using Domain.Model;
-using Domain.Model.Dto;
+﻿using Domain.Model.Dto;
 using FluentValidation;
 using Infrastructure.Repository;
 using Infrastructure.Repository.InterfacesRepository;
 using Infrastructure.Repository.InterfacesServices;
 using Infrastructure.Services.Interface;
-using Microsoft.Data.SqlClient;
 using Utilities.Shared;
 
 namespace Infrastructure.Services
