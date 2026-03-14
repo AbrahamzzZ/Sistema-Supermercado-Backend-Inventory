@@ -1,5 +1,4 @@
-﻿using Domain.Model;
-using Domain.Model.Dto;
+﻿using Domain.Model.Dto;
 using FluentValidation;
 using Infrastructure.Repository;
 using Infrastructure.Repository.InterfacesRepository;
