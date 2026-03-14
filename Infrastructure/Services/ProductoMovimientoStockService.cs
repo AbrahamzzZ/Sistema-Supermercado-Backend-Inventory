@@ -46,10 +46,10 @@ namespace Infrastructure.Services
                 return new ApiResponse<object> { IsSuccess = false, Message = "El producto no existe" };
 
             var result = await _categoriaRepository.RegistrarMovimientoAsync(stock);
-            if (result > -1)
-                return new ApiResponse<object> { IsSuccess = true, Message = Mensajes.MESSAGE_UPDATE };
+            if (result >= -1)
+                return new ApiResponse<object> { IsSuccess = true, Message = Mensajes.MESSAGE_REGISTER };
 
-            return new ApiResponse<object> { IsSuccess = false, Message = Mensajes.MESSAGE_UPDATE_FAILLED };
+            return new ApiResponse<object> { IsSuccess = false, Message = Mensajes.MESSAGE_REGISTER_FAILLED };
         }
     }
 }
