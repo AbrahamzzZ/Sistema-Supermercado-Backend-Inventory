@@ -1,5 +1,4 @@
 ﻿using Domain.Context;
-using Domain.Model;
 using Domain.Model.Dto;
 using Infrastructure.Repository.InterfacesRepository;
 using Microsoft.Data.SqlClient;
@@ -23,8 +22,8 @@ namespace Infrastructure.Repository
                 new SqlParameter("@Id_Producto", stock.IdProducto),
                 new SqlParameter("@Tipo", stock.Tipo ?? (object)DBNull.Value),
                 new SqlParameter("@Cantidad", stock.Cantidad),
-                new SqlParameter("@Precio_Compra", stock.PrecioCompra),
-                new SqlParameter("@Precio_Venta", stock.PrecioVenta),
+                new SqlParameter("@Precio_Compra", stock.PrecioCompra ?? (object)DBNull.Value),
+                new SqlParameter("@Precio_Venta", stock.PrecioVenta ?? (object)DBNull.Value),
                  new SqlParameter("@Referencia", stock.Referencia ?? (object)DBNull.Value)
             );
         }
