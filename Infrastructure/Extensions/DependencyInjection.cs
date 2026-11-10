@@ -1,11 +1,13 @@
 ﻿using Domain.Model.Dto;
 using FluentValidation;
+using Infrastructure.Kafka;
 using Infrastructure.Repository;
 using Infrastructure.Repository.InterfacesRepository;
 using Infrastructure.Repository.InterfacesServices;
 using Infrastructure.Services;
 using Infrastructure.Services.Interface;
 using Infrastructure.Services.Validators;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Extensions
@@ -28,6 +30,13 @@ namespace Infrastructure.Extensions
         public static IServiceCollection AddValidators(this IServiceCollection services)
         {
             services.AddScoped<IValidator<ProductoMovimientoStock>, ProductoStockValidator>();
+            return services;
+        }
+
+        public static IServiceCollection AddKafkaConsumers(this IServiceCollection services, IConfiguration configuration)
+        {
+            if (configuration.GetValue("Kafka:Enabled", true))
+                services.AddHostedService<MovimientoStockConsumer>();
             return services;
         }
     }
