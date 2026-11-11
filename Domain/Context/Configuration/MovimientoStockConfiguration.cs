@@ -22,11 +22,14 @@ namespace Domain.Context.Configuration
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("REFERENCIA");
-            builder.Property(e => e.Fecha)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("FECHA");
 
+            builder.Property(e => e.IdUsuarioCreacion).HasColumnName("ID_USUARIO_CREACION");
+            builder.Property(e => e.FechaCreacion)
+                .HasColumnType("datetime2")
+                .HasDefaultValueSql("(sysutcdatetime())")
+                .HasColumnName("FECHA_CREACION");
+
+            builder.HasIndex(e => new { e.IdProducto, e.FechaCreacion }, "IX_MOVIMIENTO_STOCK_PRODUCTO_FECHA");
         }
     }
 }
