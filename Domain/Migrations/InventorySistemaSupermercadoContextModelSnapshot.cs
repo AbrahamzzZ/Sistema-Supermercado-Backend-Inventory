@@ -22,6 +22,59 @@ namespace Domain.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Model.HistorialPrecio", b =>
+                {
+                    b.Property<int>("IdHistorialPrecio")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ID_HISTORIAL_PRECIO");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHistorialPrecio"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("FECHA_CREACION")
+                        .HasDefaultValueSql("(sysutcdatetime())");
+
+                    b.Property<int>("IdProducto")
+                        .HasColumnType("int")
+                        .HasColumnName("ID_PRODUCTO");
+
+                    b.Property<int?>("IdUsuarioCreacion")
+                        .HasColumnType("int")
+                        .HasColumnName("ID_USUARIO_CREACION");
+
+                    b.Property<decimal?>("PrecioCompraAnterior")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("PRECIO_COMPRA_ANTERIOR");
+
+                    b.Property<decimal?>("PrecioCompraNuevo")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("PRECIO_COMPRA_NUEVO");
+
+                    b.Property<decimal?>("PrecioVentaAnterior")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("PRECIO_VENTA_ANTERIOR");
+
+                    b.Property<decimal?>("PrecioVentaNuevo")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("PRECIO_VENTA_NUEVO");
+
+                    b.Property<string>("Referencia")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("REFERENCIA");
+
+                    b.HasKey("IdHistorialPrecio");
+
+                    b.HasIndex(new[] { "IdProducto", "FechaCreacion" }, "IX_HISTORIAL_PRECIO_PRODUCTO_FECHA")
+                        .IsDescending(false, true);
+
+                    b.ToTable("HISTORIAL_PRECIO", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Model.MovimientoStock", b =>
                 {
                     b.Property<int>("IdMovimientoStock")
@@ -35,15 +88,19 @@ namespace Domain.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CANTIDAD");
 
-                    b.Property<DateTime?>("Fecha")
+                    b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("FECHA")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("FECHA_CREACION")
+                        .HasDefaultValueSql("(sysutcdatetime())");
 
                     b.Property<int>("IdProducto")
                         .HasColumnType("int")
                         .HasColumnName("ID_PRODUCTO");
+
+                    b.Property<int?>("IdUsuarioCreacion")
+                        .HasColumnType("int")
+                        .HasColumnName("ID_USUARIO_CREACION");
 
                     b.Property<string>("Referencia")
                         .HasMaxLength(50)
@@ -59,6 +116,8 @@ namespace Domain.Migrations
 
                     b.HasKey("IdMovimientoStock");
 
+                    b.HasIndex(new[] { "IdProducto", "FechaCreacion" }, "IX_MOVIMIENTO_STOCK_PRODUCTO_FECHA");
+
                     b.ToTable("MOVIMIENTO_STOCK", (string)null);
                 });
 
@@ -68,20 +127,36 @@ namespace Domain.Migrations
                         .HasColumnType("int")
                         .HasColumnName("ID_PRODUCTO");
 
-                    b.Property<decimal?>("PrecioCompra")
+                    b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("FECHA_CREACION")
+                        .HasDefaultValueSql("(sysutcdatetime())");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("FECHA_MODIFICACION");
+
+                    b.Property<int?>("IdUsuarioCreacion")
+                        .HasColumnType("int")
+                        .HasColumnName("ID_USUARIO_CREACION");
+
+                    b.Property<int?>("IdUsuarioModificacion")
+                        .HasColumnType("int")
+                        .HasColumnName("ID_USUARIO_MODIFICACION");
+
+                    b.Property<decimal?>("PrecioCompra")
                         .HasColumnType("decimal(10, 2)")
-                        .HasDefaultValue(0m)
                         .HasColumnName("PRECIO_COMPRA");
 
                     b.Property<decimal?>("PrecioVenta")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(10, 2)")
-                        .HasDefaultValue(0m)
                         .HasColumnName("PRECIO_VENTA");
 
                     b.Property<int>("Stock")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
+                        .HasDefaultValue(0)
                         .HasColumnName("STOCK");
 
                     b.HasKey("IdProducto");
