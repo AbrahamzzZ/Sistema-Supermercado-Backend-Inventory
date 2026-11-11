@@ -5,6 +5,8 @@ namespace Infrastructure.Handler
 {
     public class TokenDelegatingHandler : DelegatingHandler
     {
+        public const string CorrelationHeader = "X-Correlation-Id";
+
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public TokenDelegatingHandler(IHttpContextAccessor httpContextAccessor)
@@ -16,7 +18,9 @@ namespace Infrastructure.Handler
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            var token = _httpContextAccessor.HttpContext?
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            var token = httpContext?
                 .Request.Headers["Authorization"]
                 .FirstOrDefault();
 
@@ -24,6 +28,11 @@ namespace Infrastructure.Handler
             {
                 request.Headers.Authorization =
                     AuthenticationHeaderValue.Parse(token);
+            }
+
+            if (httpContext?.Items["CorrelationId"] is string correlationId && !request.Headers.Contains(CorrelationHeader))
+            {
+                request.Headers.TryAddWithoutValidation(CorrelationHeader, correlationId);
             }
 
             return await base.SendAsync(request, cancellationToken);
