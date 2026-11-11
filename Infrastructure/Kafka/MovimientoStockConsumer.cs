@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog.Context;
+using System.Text;
 using System.Text.Json;
 
 namespace Infrastructure.Kafka
@@ -13,6 +15,7 @@ namespace Infrastructure.Kafka
     public class MovimientoStockConsumer : BackgroundService
     {
         public const string Topic = "movimientos-stock";
+        public const string CorrelationHeader = "X-Correlation-Id";
 
         private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -29,7 +32,6 @@ namespace Infrastructure.Kafka
                 BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "localhost:9092",
                 GroupId = configuration["Kafka:GroupId"] ?? "inventory-service",
                 AutoOffsetReset = AutoOffsetReset.Earliest,
-                // Confirmamos el offset manualmente solo cuando el movimiento se guardó
                 EnableAutoCommit = false
             };
         }
@@ -39,7 +41,9 @@ namespace Infrastructure.Kafka
 
         private async Task ConsumirAsync(CancellationToken stoppingToken)
         {
-            using var consumer = new ConsumerBuilder<string, string>(_config).SetErrorHandler((_, e) => _logger.LogWarning("Kafka: {Reason}", e.Reason)).Build();
+            using var consumer = new ConsumerBuilder<string, string>(_config)
+                .SetErrorHandler((_, e) => _logger.LogWarning("Kafka: {Reason}", e.Reason))
+                .Build();
 
             consumer.Subscribe(Topic);
             _logger.LogInformation("Consumidor Kafka suscrito a {Topic}", Topic);
@@ -48,28 +52,38 @@ namespace Infrastructure.Kafka
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    ConsumeResult<string, string>? result = null;
+                    ConsumeResult<string, string> result;
                     try
                     {
                         result = consumer.Consume(stoppingToken);
-                        await ProcesarAsync(result.Message.Value);
-                        consumer.Commit(result);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        break;
                     }
                     catch (ConsumeException ex)
                     {
                         _logger.LogWarning(ex, "Error consumiendo de Kafka, reintentando en 5s");
                         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                        continue;
                     }
-                    catch (Exception ex)
+
+                    var correlationId = LeerHeader(result.Message.Headers, CorrelationHeader) ?? Guid.NewGuid().ToString("N");
+
+                    using (LogContext.PushProperty("CorrelationId", correlationId))
                     {
-                        _logger.LogError(ex, "Error procesando el mensaje {Value}. Se reintentará.", result?.Message.Value);
-                        if (result is not null)
+                        try
+                        {
+                            await ProcesarAsync(result.Message.Value);
+                            consumer.Commit(result);
+                        }
+                        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error técnico procesando el mensaje {Offset}: {Value}. Se reintentará en 5s.",
+                                result.TopicPartitionOffset, result.Message.Value);
                             consumer.Seek(result.TopicPartitionOffset);
-                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                        }
                     }
                 }
             }
@@ -89,29 +103,48 @@ namespace Infrastructure.Kafka
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Mensaje inválido descartado: {Json}", json);
+                _logger.LogWarning(ex, "Mensaje con JSON inválido descartado: {Json}", json);
                 return;
             }
 
             if (movimiento is null)
                 return;
 
-            using var scope = _scopeFactory.CreateScope();
-            var validator = scope.ServiceProvider.GetRequiredService<IValidator<ProductoMovimientoStock>>();
-            var repository = scope.ServiceProvider.GetRequiredService<ProductoStockRepository>();
-
-            var validacion = await validator.ValidateAsync(movimiento);
-            if (!validacion.IsValid)
+            using (LogContext.PushProperty("IdUsuario", movimiento.IdUsuario))
             {
-                _logger.LogWarning("Movimiento descartado por validación: {Errores}",
-                    string.Join(" | ", validacion.Errors.Select(e => e.ErrorMessage)));
-                return;
-            }
-            
-            await repository.RegistrarMovimientoAsync(movimiento);
+                using var scope = _scopeFactory.CreateScope();
+                var validator = scope.ServiceProvider.GetRequiredService<IValidator<ProductoMovimientoStock>>();
+                var repository = scope.ServiceProvider.GetRequiredService<ProductoStockRepository>();
 
-            _logger.LogInformation("Movimiento {Tipo} registrado: producto {IdProducto}, cantidad {Cantidad}",
-                movimiento.Tipo, movimiento.IdProducto, movimiento.Cantidad);
+                var validacion = await validator.ValidateAsync(movimiento);
+                if (!validacion.IsValid)
+                {
+                    _logger.LogWarning("Movimiento descartado por validación: {Errores}",
+                        string.Join(" | ", validacion.Errors.Select(e => e.ErrorMessage)));
+                    return;
+                }
+
+                try
+                {
+                    await repository.RegistrarMovimientoAsync(movimiento, movimiento.IdUsuario);
+                }
+                catch (Exception ex) when (ErroresNegocioSql.EsErrorDeNegocio(ex, out var sqlEx))
+                {
+                    _logger.LogWarning("Movimiento {Tipo} descartado para el producto {IdProducto} (cantidad {Cantidad}): {Motivo}",
+                        movimiento.Tipo, movimiento.IdProducto, movimiento.Cantidad, sqlEx!.Message);
+                    return;
+                }
+
+                _logger.LogInformation("Movimiento {Tipo} registrado: producto {IdProducto}, cantidad {Cantidad}",
+                    movimiento.Tipo, movimiento.IdProducto, movimiento.Cantidad);
+            }
+        }
+
+        private static string? LeerHeader(Headers? headers, string nombre)
+        {
+            if (headers is not null && headers.TryGetLastBytes(nombre, out var bytes) && bytes is { Length: > 0 })
+                return Encoding.UTF8.GetString(bytes);
+            return null;
         }
     }
 }
