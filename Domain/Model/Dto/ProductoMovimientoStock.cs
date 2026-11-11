@@ -8,5 +8,6 @@
         public string? Referencia { get; set; }
         public decimal? PrecioCompra { get; set; }
         public decimal? PrecioVenta { get; set; }
+        public int? IdUsuario { get; set; }
     }
 }
