@@ -7,8 +7,9 @@ namespace Domain.Context
     {
         public virtual DbSet<ProductoStock> ProductoStocks { get; set; }
 
-        public virtual DbSet<MovimientoStock> MoviemientoStocks { get; set; }
+        public virtual DbSet<MovimientoStock> MovimientoStocks { get; set; }
 
+        public virtual DbSet<HistorialPrecio> HistorialPrecios { get; set; }
 
         public InventorySistemaSupermercadoContext(DbContextOptions<InventorySistemaSupermercadoContext> options) : base(options)
         {
@@ -16,11 +17,7 @@ namespace Domain.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(InventorySistemaSupermercadoContext).Assembly);
         }
     }
 }
-
-
-
