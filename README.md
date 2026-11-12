@@ -31,6 +31,7 @@ Vía Gateway: `http://localhost:8000/inventory/...` → aquí `/api/...` · **To
 | Método | Ruta | Descripción |
 |---|---|---|
 | POST | `/api/MovimientoStock` | Registra un movimiento manual (valida en Admin que el producto exista). Stock insuficiente → **400** |
+| GET | `/api/ProductoStock` | Stock y precios de todos los productos (lo usa Admin para el asistente de IA) |
 | GET | `/api/ProductoStock/{idProducto}` | Stock y precios actuales. **404** si el producto aún no tiene registro de stock |
 | GET | `/api/ProductoStock/{idProducto}/historial-precios` | Cambios de precio, del más reciente al más antiguo |
 
