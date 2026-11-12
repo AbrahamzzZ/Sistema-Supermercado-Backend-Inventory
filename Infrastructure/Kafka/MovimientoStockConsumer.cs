@@ -67,6 +67,8 @@ namespace Infrastructure.Kafka
                     var correlationId = LeerHeader(result.Message.Headers, CorrelationHeader) ?? Guid.NewGuid().ToString("N");
 
                     using (LogContext.PushProperty("CorrelationId", correlationId))
+                    using (LogContext.PushProperty("RequestPath", $"kafka/{result.Topic}"))
+                    using (LogContext.PushProperty("RequestMethod", "CONSUME"))
                     {
                         try
                         {
