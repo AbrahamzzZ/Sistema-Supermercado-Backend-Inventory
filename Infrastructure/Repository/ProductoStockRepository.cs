@@ -44,6 +44,21 @@ namespace Infrastructure.Repository
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<List<ProductoStockDto>> ListarStockAsync()
+        {
+            return await _context.ProductoStocks
+                .AsNoTracking()
+                .OrderBy(p => p.IdProducto)
+                .Select(p => new ProductoStockDto
+                {
+                    IdProducto = p.IdProducto,
+                    Stock = p.Stock,
+                    PrecioCompra = p.PrecioCompra,
+                    PrecioVenta = p.PrecioVenta
+                })
+                .ToListAsync();
+        }
+
         public async Task<List<HistorialPrecioDto>> ListarHistorialPreciosAsync(int idProducto)
         {
             return await _context.HistorialPrecios
