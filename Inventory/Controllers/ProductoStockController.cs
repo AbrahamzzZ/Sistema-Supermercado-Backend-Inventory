@@ -18,6 +18,11 @@ namespace Inventory.Controllers
             _consultaService = consultaService;
         }
 
+        // GET: api/ProductoStock (stock de todos los productos; lo usa Admin para el análisis con IA)
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<List<ProductoStockDto>>>> GetStocks()
+            => Ok(await _consultaService.ListarStockAsync());
+
         // GET: api/ProductoStock/5
         [HttpGet("{idProducto:int}")]
         public async Task<ActionResult<ApiResponse<ProductoStockDto>>> GetStock(int idProducto)

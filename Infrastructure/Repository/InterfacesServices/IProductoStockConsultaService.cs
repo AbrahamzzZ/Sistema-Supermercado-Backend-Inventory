@@ -5,6 +5,7 @@ namespace Infrastructure.Repository.InterfacesServices
 {
     public interface IProductoStockConsultaService
     {
+        Task<ApiResponse<List<ProductoStockDto>>> ListarStockAsync();
         Task<ApiResponse<ProductoStockDto>> ObtenerStockAsync(int idProducto);
         Task<ApiResponse<List<HistorialPrecioDto>>> ListarHistorialPreciosAsync(int idProducto);
     }

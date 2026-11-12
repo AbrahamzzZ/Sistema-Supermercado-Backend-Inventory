@@ -14,6 +14,17 @@ namespace Infrastructure.Services
             _productoStockRepository = productoStockRepository;
         }
 
+        public async Task<ApiResponse<List<ProductoStockDto>>> ListarStockAsync()
+        {
+            var lista = await _productoStockRepository.ListarStockAsync();
+            return new ApiResponse<List<ProductoStockDto>>
+            {
+                IsSuccess = true,
+                Message = lista.Count == 0 ? Mensajes.MESSAGE_QUERY_EMPTY : Mensajes.MESSAGE_QUERY,
+                Data = lista
+            };
+        }
+
         public async Task<ApiResponse<ProductoStockDto>> ObtenerStockAsync(int idProducto)
         {
             var stock = await _productoStockRepository.ObtenerStockAsync(idProducto);
