@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 using Utilities.Shared;
 
@@ -16,6 +17,9 @@ namespace Inventory.Middleware
         {
             var correlationId = httpContext.Items[CorrelationIdMiddleware.ItemKey] as string ?? httpContext.TraceIdentifier;
 
+            // El handler corre cuando la petición ya salió de su middleware: se agregan aquí el usuario y el método
+            using var logUsuario = Serilog.Context.LogContext.PushProperty("IdUsuario", httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            using var logMetodo = Serilog.Context.LogContext.PushProperty("RequestMethod", httpContext.Request.Method);
             _logger.LogError(exception, "Error no controlado en {Metodo} {Ruta}",
                 httpContext.Request.Method, httpContext.Request.Path);
 
