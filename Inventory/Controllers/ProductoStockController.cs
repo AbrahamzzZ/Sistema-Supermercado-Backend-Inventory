@@ -1,5 +1,5 @@
 using Domain.Model.Dto;
-using Infrastructure.Services;
+using Infrastructure.Repository.InterfacesServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Shared;
@@ -11,9 +11,9 @@ namespace Inventory.Controllers
     [ApiController]
     public class ProductoStockController : ControllerBase
     {
-        private readonly ProductoStockConsultaService _consultaService;
+        private readonly IProductoStockConsultaService _consultaService;
 
-        public ProductoStockController(ProductoStockConsultaService consultaService)
+        public ProductoStockController(IProductoStockConsultaService consultaService)
         {
             _consultaService = consultaService;
         }
