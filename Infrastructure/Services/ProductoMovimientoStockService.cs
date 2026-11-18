@@ -1,6 +1,7 @@
-﻿using Domain.Model.Dto;
+using Domain.Model.Dto;
 using FluentValidation;
 using Infrastructure.Repository;
+using Infrastructure.Repository.InterfacesRepository;
 using Infrastructure.Repository.InterfacesServices;
 using Infrastructure.Security;
 using Infrastructure.Services.Interface;
@@ -11,13 +12,13 @@ namespace Infrastructure.Services
 {
     public class ProductoMovimientoStockService : IProductoStockService
     {
-        private readonly ProductoStockRepository _productoStockRepository;
+        private readonly IProductoStockRepository _productoStockRepository;
         private readonly IValidator<ProductoMovimientoStock> _validator;
         private readonly IMasterData _masterDataValidator;
         private readonly ICurrentUserService _currentUser;
         private readonly ILogger<ProductoMovimientoStockService> _logger;
 
-        public ProductoMovimientoStockService(ProductoStockRepository productoStockRepository, IValidator<ProductoMovimientoStock> validator,
+        public ProductoMovimientoStockService(IProductoStockRepository productoStockRepository, IValidator<ProductoMovimientoStock> validator,
             IMasterData masterDataValidator, ICurrentUserService currentUser, ILogger<ProductoMovimientoStockService> logger)
         {
             _productoStockRepository = productoStockRepository;

@@ -1,5 +1,5 @@
 using Domain.Model.Dto;
-using Infrastructure.Repository;
+using Infrastructure.Repository.InterfacesRepository;
 using Infrastructure.Repository.InterfacesServices;
 using Utilities.Shared;
 
@@ -7,9 +7,9 @@ namespace Infrastructure.Services
 {
     public class ProductoStockConsultaService : IProductoStockConsultaService
     {
-        private readonly ProductoStockRepository _productoStockRepository;
+        private readonly IProductoStockRepository _productoStockRepository;
 
-        public ProductoStockConsultaService(ProductoStockRepository productoStockRepository)
+        public ProductoStockConsultaService(IProductoStockRepository productoStockRepository)
         {
             _productoStockRepository = productoStockRepository;
         }
