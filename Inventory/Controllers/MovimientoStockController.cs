@@ -1,6 +1,5 @@
-﻿using Domain.Model.Dto;
+using Domain.Model.Dto;
 using Infrastructure.Repository.InterfacesServices;
-using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,21 +10,12 @@ namespace Inventory.Controllers
     [ApiController]
     public class MovimientoStockController : ControllerBase
     {
-        private readonly ProductoMovimientoStockService _movimientoStockService;
+        private readonly IProductoStockService _movimientoStockService;
 
-        public MovimientoStockController(ProductoMovimientoStockService categoriaService)
+        public MovimientoStockController(IProductoStockService movimientoStockService)
         {
-            _movimientoStockService = categoriaService;
+            _movimientoStockService = movimientoStockService;
         }
-
-        //Para pruebas unitarias, descomenta este constructor y comenta el constructor anterior.
-
-        /*private readonly ICategoriaService _movimientoStockService;
-
-        public CategoriaController(ICategoriaService categoriaService)
-        {
-            _movimientoStockService = categoriaService;
-        }*/
 
         [HttpPost]
         public async Task<IActionResult> RegistrarMovimiento([FromBody] ProductoMovimientoStock stock)

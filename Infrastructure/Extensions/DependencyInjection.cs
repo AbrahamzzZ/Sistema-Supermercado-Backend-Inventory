@@ -1,4 +1,4 @@
-﻿using Domain.Model.Dto;
+using Domain.Model.Dto;
 using FluentValidation;
 using Infrastructure.Kafka;
 using Infrastructure.Repository;
@@ -17,7 +17,7 @@ namespace Infrastructure.Extensions
     {
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped<ProductoStockRepository>();
+            services.AddScoped<IProductoStockRepository, ProductoStockRepository>();
             return services;
         }
 
@@ -25,8 +25,9 @@ namespace Infrastructure.Extensions
         {
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IMasterData, MasterDataValidationService>();
-            services.AddScoped<ProductoMovimientoStockService>();
-            services.AddScoped<ProductoStockConsultaService>();
+            services.AddScoped<IProductoStockService, ProductoMovimientoStockService>();
+            services.AddScoped<IProductoStockConsultaService, ProductoStockConsultaService>();
+            services.AddScoped<MovimientoStockProcessor>();
             return services;
         }
 
