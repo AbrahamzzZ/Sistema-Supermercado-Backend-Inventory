@@ -1,14 +1,10 @@
 using Confluent.Kafka;
-using Domain.Model.Dto;
-using FluentValidation;
-using Infrastructure.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog.Context;
 using System.Text;
-using System.Text.Json;
 
 namespace Infrastructure.Kafka
 {
@@ -16,8 +12,6 @@ namespace Infrastructure.Kafka
     {
         public const string Topic = "movimientos-stock";
         public const string CorrelationHeader = "X-Correlation-Id";
-
-        private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<MovimientoStockConsumer> _logger;
@@ -98,48 +92,9 @@ namespace Infrastructure.Kafka
 
         private async Task ProcesarAsync(string json)
         {
-            ProductoMovimientoStock? movimiento;
-            try
-            {
-                movimiento = JsonSerializer.Deserialize<ProductoMovimientoStock>(json, JsonOptions);
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogWarning(ex, "Mensaje con JSON inválido descartado: {Json}", json);
-                return;
-            }
-
-            if (movimiento is null)
-                return;
-
-            using (LogContext.PushProperty("IdUsuario", movimiento.IdUsuario))
-            {
-                using var scope = _scopeFactory.CreateScope();
-                var validator = scope.ServiceProvider.GetRequiredService<IValidator<ProductoMovimientoStock>>();
-                var repository = scope.ServiceProvider.GetRequiredService<ProductoStockRepository>();
-
-                var validacion = await validator.ValidateAsync(movimiento);
-                if (!validacion.IsValid)
-                {
-                    _logger.LogWarning("Movimiento descartado por validación: {Errores}",
-                        string.Join(" | ", validacion.Errors.Select(e => e.ErrorMessage)));
-                    return;
-                }
-
-                try
-                {
-                    await repository.RegistrarMovimientoAsync(movimiento, movimiento.IdUsuario);
-                }
-                catch (Exception ex) when (ErroresNegocioSql.EsErrorDeNegocio(ex, out var sqlEx))
-                {
-                    _logger.LogWarning("Movimiento {Tipo} descartado para el producto {IdProducto} (cantidad {Cantidad}): {Motivo}",
-                        movimiento.Tipo, movimiento.IdProducto, movimiento.Cantidad, sqlEx!.Message);
-                    return;
-                }
-
-                _logger.LogInformation("Movimiento {Tipo} registrado: producto {IdProducto}, cantidad {Cantidad}",
-                    movimiento.Tipo, movimiento.IdProducto, movimiento.Cantidad);
-            }
+            using var scope = _scopeFactory.CreateScope();
+            var processor = scope.ServiceProvider.GetRequiredService<MovimientoStockProcessor>();
+            await processor.ProcesarAsync(json);
         }
 
         private static string? LeerHeader(Headers? headers, string nombre)
